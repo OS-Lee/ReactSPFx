@@ -25,7 +25,7 @@
       "name": "Hosted workbench",
       "type": "chrome",
       "request": "launch",
-      "url": "https://wendytest123.sharepoint.com/sites/lee/_layouts/workbench.aspx",
+      "url": "https://tenant.sharepoint.com/sites/lee/_layouts/workbench.aspx",
       "webRoot": "${workspaceRoot}",
       "sourceMaps": true,
       "sourceMapPathOverrides": {
