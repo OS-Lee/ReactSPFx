@@ -92,6 +92,7 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps,IReactGet
             </div>
           </Slider>
           <br/>
+          <br/>
           <div style={{ textAlign: "center" }}>
           <button className="button" onClick={this.previous}>
             Previous
