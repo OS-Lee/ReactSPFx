@@ -101,7 +101,7 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps,IReactGet
         </div>
         <GraphFileBrowser
         getAuthenticationToken={this.getAuthenticationToken}
-        endpoint='https://graph.microsoft.com/v1.0/sites/wendytest123.sharepoint.com,2bf7a991-b669-4537-b0f5-59f7d6452e48,2c7b55b2-e306-407b-b1a2-1ca6fecc99ed'
+        endpoint='https://graph.microsoft.com/v1.0/sites/siteid'
         onSuccess={(selectedKeys: any[]) => console.log(selectedKeys)}
         onCancel={(err: Error) => console.log(err.message)}
       />
