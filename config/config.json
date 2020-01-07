@@ -11,7 +11,7 @@
       ]
     }
   },
-  "externals": {},
+  "externals": {"jquery":"node_modules/jquery/dist/jquery.min.js"},
   "localizedResources": {
     "ReactSpFxWebPartStrings": "lib/webparts/reactSpFx/loc/{locale}.js"
   }

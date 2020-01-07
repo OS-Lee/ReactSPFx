@@ -3,9 +3,9 @@
   "solution": {
     "name": "react-sp-fx-client-side-solution",
     "id": "09b2e1bf-9dba-48c5-9707-a1a46d937cff",
-    "version": "1.0.0.0",
+    "version": "1.0.0.2",
     "includeClientSideAssets": true,
-    "skipFeatureDeployment": true,
+    "skipFeatureDeployment": false,
     "isDomainIsolated": false,
     "webApiPermissionRequests": [
       {
@@ -15,7 +15,15 @@
       {
         "resource": "Microsoft Graph",
         "scope": "Sites.ReadWrite.All"
-      }
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "Group.ReadWrite.All"
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "Directory.ReadWrite.All"
+      }      
     ]
   },
   "paths": {

@@ -1,16 +1,49 @@
 @import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
 
+//@import "./fonts.module.scss";
+
+//https://www.sebastienlevert.com/2017/12/05/sharepoint-framework-angular-elements-material-design/
+// @font-face {
+//   font-family: 'FS Lola';
+//   //src: url("../fonts/FSLola.eot");
+//   src: //url("../fonts/FSLola.woff") format("woff"),
+//   url(https://wendytest123.sharepoint.com/sites/AppCatalog/SiteAssets/SPFx/google.woff2) format('woff2');
+//     //url("../fonts/FSLola.ttf") format("truetype"); 
+//     //url("../fonts/FSLola.otf") format("svg");
+//   font-weight: 400;
+//   font-style: normal;
+// }
+@import url('https://fonts.googleapis.com/css?family=Exo+2:100,300,400,700,900');
+@import url('https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900');
+
 .reactSpFx {
   .container {
     max-width: 700px;
     margin: 0px auto;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);
+
+    font-family: "Roboto" !important;
+    text-rendering: optimizeLegibility;
+    background-color: #f1f1f1;
+    color: #4a4a4a;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+    direction: ltr;
+    margin: 0;  
   }
 
-  .row {
+  .rowA {
     @include ms-Grid-row;
     @include ms-fontColor-white;
-    background-color: $ms-color-themeDark;
+    background-color:aquamarine;
+    padding: 20px;
+  }
+  .rowB {
+    @include ms-Grid-row;
+    @include ms-fontColor-white;
+    background-color: darkkhaki;
     padding: 20px;
   }
 
@@ -70,5 +103,13 @@
       vertical-align: top;
       display: inline-block;
     }
+
+    .img {
+      background: url('../../assets/panda.jpg');
+    }
   }
 }
+// div[class^='pageTitle_']
+// {
+//     display: none;
+// }
