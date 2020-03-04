@@ -23,7 +23,11 @@
       {
         "resource": "Microsoft Graph",
         "scope": "Directory.ReadWrite.All"
-      }      
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "Mail.Send"
+      }           
     ]
   },
   "paths": {

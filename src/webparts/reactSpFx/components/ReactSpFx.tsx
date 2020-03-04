@@ -2,7 +2,8 @@ import * as React from 'react';
 import styles from './ReactSpFx.module.scss';
 import { IReactSpFxProps } from './IReactSpFxProps';
 import { escape } from '@microsoft/sp-lodash-subset';
-import { sp } from "@pnp/sp";
+import { sp, ItemAddResult } from "@pnp/sp";
+
 import { SPHttpClient, SPHttpClientResponse, MSGraphClient } from '@microsoft/sp-http';
 
 import Slider from "react-slick";
@@ -169,10 +170,12 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
         })
         .then(editor => {
           myEditor = editor;
-          var valueHtml:string;
-          valueHtml=value.substr(1).slice(0, -1).replace('\\"/g','"');
+          var valueHtml: string;
+          valueHtml = value.substr(1).slice(0, -1).replace('\\"/g', '"');
           editor.setData(valueHtml);
-          editor.addCss(".cke_editable{cursor:text; font-size: 14px; font-family: Arial, sans-serif;}")
+          //editor.addCss(".cke_editable{cursor:text; font-size: 14px; font-family: Arial, sans-serif;}");
+          //editor.setReadOnly(true);
+          editor.isReadOnly = true;
           console.log("CKEditor5 initiated");
         })
         .catch(error => {
@@ -184,17 +187,44 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
   }
 
   public componentDidMount() {
+    //var dom=this.props.context.pageContext..domElement;
+    //   var value="Testvalue";
+    //   sp.web.lists.getByTitle("listnotexist").items.add({
+    //     Title : value})
+    //     .catch((iar: any)  => {
+    //      console.log(value,iar.item);
 
-    sp.web.lists.getByTitle("TestList").items.getById(14).get().then((item: any) =>{        
-      var value=JSON.stringify(item.Description);
-      this.InitializeCKeditor(value);   
-    })    
+    //      const reader = iar.response.body.getReader();
+    //      reader.read().then(({ done, value }) => {
+    //        console.log(value);
+    //      })
+    //  })
+
+    const query =  `<Where>
+        <Eq><FieldRef Name="File_x0020_Type"/>      
+            <Value Type="Text">json</Value> 
+        </Eq> 
+    </Where>`;
+    const xml = '<View Scope="RecursiveAll"><Query>' + query + '</Query></View>';  
+    sp.web.lists.getByTitle('MyDoc2').getItemsByCAMLQuery({'ViewXml':xml},'FileRef').then((items:any) => {
+      items.map((item)=>{
+        console.log(item);
+        sp.web.getFileByServerRelativeUrl(item.FileRef).getJSON().then((data)=>{
+          console.log(data);
+        })
+      }) 
+    })
+
+    sp.web.lists.getByTitle("TestList").items.getById(19).get().then((item: any) => {
+      var value = JSON.stringify(item.Description);
+      this.InitializeCKeditor(value);
+    })
     var store: ITermStore = taxonomy.termStores.getByName("Taxonomy_hAIlyuIrZSNizRU+uUbanA==");
-    var set: ITermSet = store.getTermSetById("70719569-ae34-4f24-81b9-0629d68c05aa");    
+    var set: ITermSet = store.getTermSetById("70719569-ae34-4f24-81b9-0629d68c05aa");
     // load the data into the terms instances
-    set.terms.get().then((terms:ITerm[])=>{
-      terms.forEach((term: any) => {        
-        console.log(term['Name']);        
+    set.terms.get().then((terms: ITerm[]) => {
+      terms.forEach((term: any) => {
+        console.log(term['Name']);
         term.LocalCustomProperties._Sys_Nav_TargetUrl
       })
     });
@@ -287,14 +317,58 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
       slidesToScroll: 1
     };
 
+    const sendMail = {
+      message: {
+        subject: "Test",
+        body: {
+          contentType: "Text",
+          content: "test email in SPFx call."
+        },
+        toRecipients: [
+          {
+            emailAddress: {
+              address: "lee@wendytest123.onmicrosoft.com"
+            }
+          }
+        ],
+        ccRecipients: [
+          {
+            emailAddress: {
+              address: "lee@wendytest123.onmicrosoft.com"
+            }
+          }
+        ]
+      },
+      saveToSentItems: "false"
+    };
+
+    // let res = await client.api('/me/sendMail')
+    //   .post(sendMail);
     this.props.context.msGraphClientFactory
       .getClient()
       .then((client: MSGraphClient): void => {
         // get information about the current user from the Microsoft Graph
         client
-          .api('/me')
+          // .api('/me')
+          // .get((error, response: any, rawResponse?: any) => {
+          //   let user = response.displayName;
+          // });
+
+          // .api('/me/sendMail')
+          // .post(sendMail).then(()=>{
+          //   console.log('email send');
+          // })
+          // .api('/me/drive/recent')
+          // .get((error, response: any, rawResponse?: any) => {
+          //   console.log(response);
+          //   response.value.map((item: any) => {
+          //     console.log(item.id);
+          //  });
+          // });
+          .api("sites?search=*")
+          .version("v1.0")
           .get((error, response: any, rawResponse?: any) => {
-            let user = response.displayName;
+            console.log(response);            
           });
       });
 
@@ -303,17 +377,18 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
 
         <div className={styles.container}>
           Image Load
-        {/* <img src={require('../../assets/panda.jpg')} alt="test" /> */}
+        <img src={require('../../assets/panda.jpg')} alt="test" />
           {/* <img src={${require<string>('../../assets/panda.jpg')}} alt="My Company" /> */}
           <div className={styles.img} title="Rencore logo">content</div>
 
           <div>
+            CKEditor
             <textarea id="editor1"></textarea>
           </div>
           <button className="button" onClick={this.AddUserToGroup}>
             AddUserToGroup
           </button>
-
+          
           {(this.state.items || []).map((item, index) => (
             <div key={item.ID} className={(index % 2 == 0) ? styles.rowA : styles.rowB}>{item.Title}
               {index % 2}

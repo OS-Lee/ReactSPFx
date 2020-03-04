@@ -21,8 +21,7 @@ export default class ReactSpFxWebPart extends BaseClientSideWebPart<IReactSpFxWe
 
  
   public render(): void {
-    var tokenId = 'https://graph.microsoft.com'
-
+    var tokenId = 'https://graph.microsoft.com';
     this.context.aadTokenProviderFactory.getTokenProvider()
       .then((tokenProvider: AadTokenProvider): Promise<string> => {
         // retrieve access token for the enterprise API secured with Azure AD
@@ -36,7 +35,7 @@ export default class ReactSpFxWebPart extends BaseClientSideWebPart<IReactSpFxWe
           {
             description: this.properties.description,
             context:this.context,
-            userToken: accessToken
+            userToken: accessToken            
           });
 
         ReactDom.render(element, this.domElement);

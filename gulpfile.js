@@ -20,19 +20,19 @@ build.addSuppression(`Warning - [sass] The local CSS class 'ms-Grid' is not came
 //     }
 // });
 
-build.configureWebpack.mergeConfig({
-    additionalConfiguration: (generatedConfiguration) => {
-      generatedConfiguration.module.rules.push(
-        {
-          test: /\.woff2(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-          use: {
-            loader: 'url-loader'
-          }
-        }
-      );
+// build.configureWebpack.mergeConfig({
+//     additionalConfiguration: (generatedConfiguration) => {
+//       generatedConfiguration.module.rules.push(
+//         {
+//           test: /\.woff2(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+//           use: {
+//             loader: 'url-loader'
+//           }
+//         }
+//       );
   
-      return generatedConfiguration;
-    }
-  });
+//       return generatedConfiguration;
+//     }
+//   });
 
 build.initialize(gulp);
