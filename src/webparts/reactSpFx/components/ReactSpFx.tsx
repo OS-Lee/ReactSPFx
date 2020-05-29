@@ -187,6 +187,16 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
   }
 
   public componentDidMount() {
+
+    // this.props.context.spHttpClient.get(`https://wendytest123.sharepoint.com/sites/itch2/_api/web/lists/getbytitle('List1')/items?select=ID,Title`,
+    //   SPHttpClient.configurations.v1).then((response: SPHttpClientResponse) => {
+    //     response.json().then((responseJSON: any) => {
+    //       reactHandler.setState({
+    //         items: responseJSON.value.sort()
+    //       });
+    //     });
+    //   });
+
     //var dom=this.props.context.pageContext..domElement;
     //   var value="Testvalue";
     //   sp.web.lists.getByTitle("listnotexist").items.add({
@@ -199,6 +209,12 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
     //        console.log(value);
     //      })
     //  })
+
+    sp.web.lists.getByTitle('MyDoc2').items.select('Id,FileRef').get().then((items:any) => {      
+      items.map((item)=>{       
+        console.log(item.FileRef);       
+      }) 
+    })
 
     const query =  `<Where>
         <Eq><FieldRef Name="File_x0020_Type"/>      
@@ -308,6 +324,7 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
     });
     console.log(data);
   }
+  
   public render(): React.ReactElement<IReactSpFxProps> {
     const settings = {
       dots: true,
@@ -398,12 +415,12 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
           ))}
         </div>
 
-        {/* <GraphFileBrowser
+        <GraphFileBrowser
         getAuthenticationToken={this.getAuthenticationToken}
         endpoint='https://graph.microsoft.com/v1.0/sites/siteid'
         onSuccess={(selectedKeys: any[]) => console.log(selectedKeys)}
         onCancel={(err: Error) => console.log(err.message)}
-      /> */}
+      />
 
         <select
           value={this.state.selectValue}
