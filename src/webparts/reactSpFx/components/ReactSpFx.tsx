@@ -4,7 +4,7 @@ import { IReactSpFxProps } from './IReactSpFxProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import { sp, ItemAddResult } from "@pnp/sp";
 
-import { SPHttpClient, SPHttpClientResponse, MSGraphClient } from '@microsoft/sp-http';
+import { SPHttpClient, ISPHttpClientOptions, SPHttpClientResponse, MSGraphClient } from '@microsoft/sp-http';
 
 import Slider from "react-slick";
 import "../../../../node_modules/slick-carousel/slick/slick.css";
@@ -16,6 +16,8 @@ import { graph } from "@pnp/graph";
 import { taxonomy, ITermStore, ITermSet, ITerms, ITermData, ITerm } from "@pnp/sp-taxonomy";
 import ClassicEditor from 'ckeditor5-classic'
 import * as jQuery from 'jquery';
+
+import { Dropdown, DropdownMenuItemType, IDropdownStyles, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 
 export interface IReactItem {
   ID: string,
@@ -83,8 +85,9 @@ ClassicEditor.defaultConfig = {
   language: 'en'
 }
 var myEditor;
-export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGetItemsState> {
 
+export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGetItemsState> {
+  
   public constructor(props: IReactSpFxProps) {
     super(props);
     window._graphToken = props.userToken;
@@ -92,12 +95,16 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
       items: [],
       selectValue: "Radish"
     };
+    sp.setup({
+      spfxContext: this.context
+    })
     this.next = this.next.bind(this);
     this.previous = this.previous.bind(this);
     graph.setup({
       spfxContext: this.props.context
     });
-  }
+    
+  }  
 
   public getAuthenticationToken(): Promise<string> {
     return new Promise(resolve => {
@@ -187,6 +194,30 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
   }
 
   public componentDidMount() {
+    const obj: string = JSON.stringify(
+      {
+        "fields": {
+          'Title': 'Lin',
+          'Company': 'Microsoft'
+        }
+      }
+    );
+    this.props.context.msGraphClientFactory
+      .getClient()
+      .then((client: MSGraphClient): void => {
+        client
+          .api("/sites/wendytest123.sharepoint.com,2bf7a991-b669-4537-b0f5-59f7d6452e48,2c7b55b2-e306-407b-b1a2-1ca6fecc99ed/lists/77d9ee4c-9142-40d1-8edb-9bdfd226be2a/items")
+          .header('Content-Type', 'application/json')
+          .version("v1.0")
+          .post(obj, (err, res, success) => {
+            if (err) {
+              console.log(err);
+            }
+            if (success) {
+              console.log("success");
+            }
+          })
+      });
 
     // this.props.context.spHttpClient.get(`https://wendytest123.sharepoint.com/sites/itch2/_api/web/lists/getbytitle('List1')/items?select=ID,Title`,
     //   SPHttpClient.configurations.v1).then((response: SPHttpClientResponse) => {
@@ -209,26 +240,32 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
     //        console.log(value);
     //      })
     //  })
-
-    sp.web.lists.getByTitle('MyDoc2').items.select('Id,FileRef').get().then((items:any) => {      
-      items.map((item)=>{       
-        console.log(item.FileRef);       
-      }) 
+    sp.web.lists.getByTitle('MyDoc2').views.getByTitle("All Documents").get().then((view: any) => {
+      sp.web.lists.getByTitle('MyDoc2').getItemsByCAMLQuery({
+        ViewXml: `<View><Query>` + view.ViewQuery + `</Query></View>`
+      }).then((items: any) => {
+        console.log(items);
+      });
+    })
+    sp.web.lists.getByTitle('MyDoc2').items.select('Id,FileRef').get().then((items: any) => {
+      items.map((item) => {
+        console.log(item.FileRef);
+      })
     })
 
-    const query =  `<Where>
+    const query = `<Where>
         <Eq><FieldRef Name="File_x0020_Type"/>      
             <Value Type="Text">json</Value> 
         </Eq> 
     </Where>`;
-    const xml = '<View Scope="RecursiveAll"><Query>' + query + '</Query></View>';  
-    sp.web.lists.getByTitle('MyDoc2').getItemsByCAMLQuery({'ViewXml':xml},'FileRef').then((items:any) => {
-      items.map((item)=>{
+    const xml = '<View Scope="RecursiveAll"><Query>' + query + '</Query></View>';
+    sp.web.lists.getByTitle('MyDoc2').getItemsByCAMLQuery({ 'ViewXml': xml }, 'FileRef').then((items: any) => {
+      items.map((item) => {
         console.log(item);
-        sp.web.getFileByServerRelativeUrl(item.FileRef).getJSON().then((data)=>{
+        sp.web.getFileByServerRelativeUrl(item.FileRef).getJSON().then((data) => {
           console.log(data);
         })
-      }) 
+      })
     })
 
     sp.web.lists.getByTitle("TestList").items.getById(19).get().then((item: any) => {
@@ -324,8 +361,71 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
     });
     console.log(data);
   }
-  
-  public render(): React.ReactElement<IReactSpFxProps> {
+
+  protected UploadFile() {
+    var files = (document.getElementById('uploadFile') as HTMLInputElement).files;
+
+    var file = files[0];
+    if (file != undefined || file != null) {
+      let spOpts: ISPHttpClientOptions = {
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        body: file
+      };
+
+      var url = `https://wendytest123.sharepoint.com/sites/modernteamlisa/_api/Web/Lists/getByTitle('MyDoc')/RootFolder/Files/Add(url='${file.name}', overwrite=true)`
+
+      this.props.context.spHttpClient.post(url, SPHttpClient.configurations.v1, spOpts).then((response: SPHttpClientResponse) => {
+        console.log(`Status code: ${response.status}`);
+        console.log(`Status text: ${response.statusText}`);
+        response.json().then((responseJSON: JSON) => {
+          console.log(responseJSON);
+
+          let readOpts: ISPHttpClientOptions = {
+            headers: {
+              "Accept": "application/json"
+            }
+          }
+
+          this.props.context.spHttpClient.get(responseJSON["@odata.id"] + "/ListItemAllFields", SPHttpClient.configurations.v1, readOpts).then((readResponse: SPHttpClientResponse) => {
+            readResponse.json().then((metadataJSON: JSON) => {
+              console.log(metadataJSON);
+              var metadataType = metadataJSON["@odata.type"].replace('#', '');
+
+              //SP.Data.MyDocItem metadata
+              var metaDataBody: string = JSON.stringify({
+                '__metadata': {
+                  'type': metadataType
+                },
+                'Title': 'testupdate'
+              });
+              let updateOpt: ISPHttpClientOptions = {
+                headers: {
+                  "content-type": "application/json;odata=verbose",
+                  "If-Match": "*",
+                  "X-HTTP-Method": "MERGE",
+                  'odata-version': '3.0'
+                },
+                body: metaDataBody
+              }
+
+              this.props.context.spHttpClient.post(responseJSON["@odata.id"] + "/ListItemAllFields", SPHttpClient.configurations.v1, updateOpt).then((reqResponse: any) => {
+                console.log(reqResponse.status)
+              })
+            })
+          })
+
+        });
+      });
+
+    }
+  }
+  private changeStateDepartment = (item: IDropdownOption): void => {
+    console.log("dropdown department changed values..." + item.selected + " , " + item.text);
+}
+  public render(): React.ReactElement<IReactSpFxProps> {    
     const settings = {
       dots: true,
       infinite: true,
@@ -385,7 +485,7 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
           .api("sites?search=*")
           .version("v1.0")
           .get((error, response: any, rawResponse?: any) => {
-            console.log(response);            
+            console.log(response);
           });
       });
 
@@ -394,9 +494,12 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
 
         <div className={styles.container}>
           Image Load
-        <img src={require('../../assets/panda.jpg')} alt="test" />
+        {/* <img src={require('../../assets/panda.jpg')} alt="test" /> */}
           {/* <img src={${require<string>('../../assets/panda.jpg')}} alt="My Company" /> */}
-          <div className={styles.img} title="Rencore logo">content</div>
+          {/* <div className={styles.img} title="Rencore logo">content</div> */}
+
+          <input type="file" id="uploadFile" />
+          <button className="button" onClick={() => this.UploadFile()} >Upload</button>
 
           <div>
             CKEditor
@@ -405,7 +508,28 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
           <button className="button" onClick={this.AddUserToGroup}>
             AddUserToGroup
           </button>
-          
+
+          <Dropdown
+                  placeHolder="Select Department"
+                  label=""
+                  multiSelect = {true}                  
+                  id="component"                  
+                  ariaLabel="Basic dropdown example"
+                  options={[
+                    { key: 'fruitsHeader', text: 'Fruits', itemType: DropdownMenuItemType.Header },
+                    { key: 'apple', text: 'Apple' },
+                    { key: 'banana', text: 'Banana' },
+                    { key: 'orange', text: 'Orange', disabled: true },
+                    { key: 'grape', text: 'Grape' },
+                    { key: 'divider_1', text: '-', itemType: DropdownMenuItemType.Divider },
+                    { key: 'vegetablesHeader', text: 'Vegetables', itemType: DropdownMenuItemType.Header },
+                    { key: 'broccoli', text: 'Broccoli' },
+                    { key: 'carrot', text: 'Carrot' },
+                    { key: 'lettuce', text: 'Lettuce' },
+                  ]}
+                  onChanged={this.changeStateDepartment}
+                />
+
           {(this.state.items || []).map((item, index) => (
             <div key={item.ID} className={(index % 2 == 0) ? styles.rowA : styles.rowB}>{item.Title}
               {index % 2}
@@ -416,11 +540,11 @@ export default class ReactSpFx extends React.Component<IReactSpFxProps, IReactGe
         </div>
 
         <GraphFileBrowser
-        getAuthenticationToken={this.getAuthenticationToken}
-        endpoint='https://graph.microsoft.com/v1.0/sites/siteid'
-        onSuccess={(selectedKeys: any[]) => console.log(selectedKeys)}
-        onCancel={(err: Error) => console.log(err.message)}
-      />
+          getAuthenticationToken={this.getAuthenticationToken}
+          endpoint='https://graph.microsoft.com/v1.0/sites/siteid'
+          onSuccess={(selectedKeys: any[]) => console.log(selectedKeys)}
+          onCancel={(err: Error) => console.log(err.message)}
+        />
 
         <select
           value={this.state.selectValue}

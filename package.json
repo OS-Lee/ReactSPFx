@@ -33,6 +33,7 @@
     "office-ui-fabric-react": "6.143.0",
     "react": "16.7.0",
     "react-dom": "16.7.0",
+    "react-dropdown": "^1.7.0",
     "react-slick": "^0.24.0",
     "slick-carousel": "^1.8.1"
   },
