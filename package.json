@@ -29,7 +29,7 @@
     "@types/react-dom": "16.8.0",
     "@types/webpack-env": "1.13.1",
     "ckeditor5-classic": "^12.1.2",
-    "jquery": "^2.2.4",
+    "jquery": "^3.5.0",
     "office-ui-fabric-react": "6.143.0",
     "react": "16.7.0",
     "react-dom": "16.7.0",
